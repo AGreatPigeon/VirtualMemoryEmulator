@@ -1,0 +1,48 @@
+package code;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+public class PhysicalMemory {
+	private VirtualMemory bs;
+	
+	//private final Map<Integer, byte[]> ramMap;
+
+	private ConcurrentLinkedQueue<Integer> pagesStored;
+	private ConcurrentHashMap<Integer, byte[]> ramMap;
+	
+	int curFreeFrame;
+	int capacity;
+
+	public PhysicalMemory(VirtualMemory bs, final int frames) {
+		
+		capacity = frames;
+		pagesStored = new ConcurrentLinkedQueue<Integer>();
+		ramMap = new ConcurrentHashMap<Integer, byte[]>(capacity);
+		
+		this.bs = bs;
+		curFreeFrame = 0;
+	}
+
+	public int insertPage(int page_num) {
+		
+		if (ramMap.containsKey(page_num)){
+			pagesStored.remove(page_num);
+		}
+		
+		while (pagesStored.size() >= capacity){
+			int expiredKey = pagesStored.poll();
+			ramMap.remove(expiredKey);
+		}
+		
+		ramMap.put(curFreeFrame, bs.get(page_num));
+		
+		curFreeFrame++;
+		return curFreeFrame - 1;
+	}
+	
+	public int getValue(int frameNum, int offset) {
+		byte[]value = ramMap.get(frameNum);
+		return value[offset];
+	}
+}

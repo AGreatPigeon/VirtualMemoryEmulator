@@ -26,7 +26,7 @@ public class AddressTranslator {
                 
                 int f_num = tlb.get(page_num);
                 int phy_addr = f_num * 256 + offset;
-                int value = pmem.getValue(f_num, offset);
+                int value = pmem.getMemoryValue(f_num, offset);
                 
                 System.out.println("Virtual Address: " + addr + " Physical Address: " + phy_addr + " Value: " + value);
             }

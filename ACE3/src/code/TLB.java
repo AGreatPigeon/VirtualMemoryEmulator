@@ -37,18 +37,18 @@ public class TLB<K, V> {
 		};
 	}
 	
-	private synchronized void put(int key, int value){
-		cacheMap.put(key, value);
+	private synchronized void put(int pageNumber, int frameNumber){
+		cacheMap.put(pageNumber, frameNumber);
 	}
 	
-	public synchronized int get(int key){
-		if (cacheMap.containsKey(key)){
-			return cacheMap.get(key);
+	public synchronized int get(int pageNumber){
+		if (cacheMap.containsKey(pageNumber)){
+			return cacheMap.get(pageNumber);
 		} else {
 			tlb_miss++;
-			int value = pt.getFrameNumber(key);
-			put(key, value);
-			return cacheMap.get(key);
+			int frameNumber = pt.getFrameNumber(pageNumber);
+			put(pageNumber, frameNumber);
+			return cacheMap.get(pageNumber);
 		}
 	}
 

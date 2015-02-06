@@ -46,7 +46,7 @@ public class TestPhysicalMemory {
 	}
 
 	/**
-	 * Test method for {@link code.PhysicalMemory#getValue(int, int)}.
+	 * Test method for {@link code.PhysicalMemory#getMemoryValue(int, int)}.
 	 */
 	@Test
 	public void testGetValue() {
@@ -55,7 +55,7 @@ public class TestPhysicalMemory {
         int page_num = (addr & 0xFFFF) >>> 8;
 		
 		long timeStart = System.nanoTime();
-		int result = pmem.getValue(page_num, offset);
+		int result = pmem.getMemoryValue(page_num, offset);
 		long timeEnd = System.nanoTime();
 		
 		assertEquals(0, result);
@@ -67,7 +67,7 @@ public class TestPhysicalMemory {
         page_num = (addr & 0xFFFF) >>> 8;
 		
 		timeStart = System.nanoTime();
-		result = pmem.getValue(page_num, offset);
+		result = pmem.getMemoryValue(page_num, offset);
 		timeEnd = System.nanoTime();
 		
 		assertEquals(-46, result);
