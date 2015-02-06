@@ -1,0 +1,58 @@
+package code;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/* Version History:
+ * 0.1: Initial Class Creation
+ * 		Upon reviewing the Java SDK for a collection to be used as a LRU cache for the TLB, 
+ * 		I decided to plump for LinkedHashMap.
+ * 		Reasoning was 2-fold. Chief reason was performance, as the majority of the operations 
+ * 		will be get and insert which in LinkedHashMap are O(1).
+ * 		Secondly, LinkedHashMap can store the information in an ordered fashion and provides
+ * 		the means to remove the eldest entry, the main requirement of a LRU cache.
+ */
+
+public class TLB<K, V> {
+
+	PageTable pt;
+
+	private final Map<Integer, Integer> cacheMap;
+
+	double tlb_miss; 
+	
+	public TLB (PageTable pt, final int cacheSize){
+		this.pt = pt;
+		tlb_miss = 0;
+		
+		this.cacheMap = new LinkedHashMap<Integer, Integer>(cacheSize, 0.75f, true){
+
+			private static final long serialVersionUID = 8674981914305698482L;
+
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest){
+				// Stipulate when to remove the eldest entry
+				return size() > cacheSize;
+			}
+		};
+	}
+	
+	private synchronized void put(int key, int value){
+		cacheMap.put(key, value);
+	}
+	
+	public synchronized int get(int key){
+		if (cacheMap.containsKey(key)){
+			return cacheMap.get(key);
+		} else {
+			tlb_miss++;
+			int value = pt.getFrameNumber(key);
+			put(key, value);
+			return cacheMap.get(key);
+		}
+	}
+
+	public double getTLBMissRate() {
+		return (tlb_miss / 1000) * 100;
+	}
+}
