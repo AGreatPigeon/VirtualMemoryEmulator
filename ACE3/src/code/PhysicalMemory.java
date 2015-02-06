@@ -8,17 +8,16 @@ public class PhysicalMemory {
 	
 	private final Map<Integer, byte[]> ramMap;
 
-	int curFreeFrame, size;
+	int curFreeFrame;
 
 	public PhysicalMemory(VirtualMemory bs, final int frames) {
-		size = frames;
 		
 		this.ramMap = new LinkedHashMap<Integer, byte[]>(frames, 0.75F, false) {
 			@Override
 			protected boolean removeEldestEntry(
 					Map.Entry<Integer, byte[]> eldest) {
 				// Stipulate when to remove the eldest entry
-				return size() > size;
+				return size() > frames;
 			}
 		};
 		
