@@ -1,0 +1,108 @@
+package code;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class AddressTranslator {
+
+	public static void main(String[] args) {
+		
+		ExecutorService service = Executors.newFixedThreadPool(256);
+		String inputFile = "InputFile.txt";
+        final int MASK8 = 0xFF;
+        final int MASK16 = 0xFFFF;
+        
+		try{
+			FileInputStream inputStream = new FileInputStream(inputFile);
+            Scanner sc = new Scanner(inputStream, "UTF-8");
+            
+            VirtualMemory bs = new VirtualMemory();
+            PhysicalMemory pmem = new PhysicalMemory(bs, 128);
+            PageTable pt = new PageTable(pmem);
+            TLB<Integer, Integer> tlb = new TLB<Integer, Integer>(pt, 16);
+            
+            while(sc.hasNextInt()){
+            	
+            	int addr = sc.nextInt();
+            	service.execute(new Worker(addr, tlb, pmem));
+
+//				int offset = addr & MASK8;
+//                int page_num = (addr & MASK16) >>> 8;
+//                
+//                int f_num = tlb.get(page_num);
+//                int phy_addr = f_num * 256 + offset;
+//                int value = pmem.getMemoryValue(f_num, offset);
+                
+//                System.out.println("Virtual Address: " + addr + " Physical Address: " + phy_addr + " Value: " + value);
+            }
+            sc.close();
+            System.out.println("Miss Rate <TLB>: " + tlb.getTLBMissRate() + 
+            					"%. Miss rate <Pages>: " + pt.getPageMisses() + "%.");
+		} catch(Exception e){
+            e.printStackTrace();
+            System.exit(0);
+        }
+		
+	}
+	
+//	public static void main(String[] args) throws IOException {
+//        // Create worker thread pool.
+//		ExecutorService service = Executors.newFixedThreadPool(256);
+//        String inputFile = "InputFile.txt";
+//        BufferedReader buffer = new BufferedReader(new FileReader(inputFile));
+//        String line;
+//        
+//        VirtualMemory bs = new VirtualMemory();
+//        PhysicalMemory pmem = new PhysicalMemory(bs, 128);
+//        PageTable pt = new PageTable(pmem);
+//        TLB<Integer, Integer> tlb = new TLB<Integer, Integer>(pt, 16);
+//        
+//        // Read each line and hand it off to a worker thread for processing.
+//        while ((line = buffer.readLine()) != null) {
+//        	int nextValue = Integer.parseInt(line);
+//            service.execute(new Worker(nextValue, tlb, pmem));
+//        }
+//        
+//        System.out.println("Miss Rate <TLB>: " + tlb.getTLBMissRate() + 
+//				"%. Miss rate <Pages>: " + pt.getPageMisses() + "%.");
+//    }
+	
+	public static class Worker implements Runnable {
+
+		int addr;
+		final int MASK8 = 0xFF;
+        final int MASK16 = 0xFFFF;
+        
+        TLB<Integer, Integer> tlb;
+        PhysicalMemory pmem;
+		
+		public Worker(int nextValue, TLB<Integer, Integer> tlb, PhysicalMemory pmem) {
+			
+			addr = nextValue;
+			this.tlb = tlb;
+			this.pmem = pmem;
+			
+		}
+
+		@Override
+		public void run() {
+			synchronized(this){
+			int offset = addr & MASK8;
+            int page_num = (addr & MASK16) >>> 8;
+            
+            int f_num = tlb.get(page_num);
+            int phy_addr = f_num * 256 + offset;
+            int value = pmem.getMemoryValue(f_num, offset);
+            
+            System.out.println("Virtual Address: " + addr + " Physical Address: " + phy_addr + " Value: " + value);
+			}
+		}
+		
+	}
+
+}

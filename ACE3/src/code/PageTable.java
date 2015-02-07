@@ -15,7 +15,7 @@ public class PageTable {
 		pageFault = 0;
 	}
 	
-	public int getFrameNumber(int page_num){	
+	public synchronized int getFrameNumber(int page_num){	
 		if (!valid[page_num]){
 			valid[page_num] = true;
 			pageFault++;

@@ -1,0 +1,44 @@
+package code;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+public class VirtualMemory {
+
+	
+	byte[][] data = new byte[256][256];
+
+	public VirtualMemory() {
+		File fileName;
+		RandomAccessFile disk = null;
+		
+		byte[] page = null;
+		// the file representing the simulated disk
+		try {
+			fileName = new File("BACKING_STORE");
+			disk = new RandomAccessFile(fileName, "r");
+			
+			for (int pageNumber = 0; pageNumber < 256; ++pageNumber) {
+				disk.seek(pageNumber * 256);
+				page = data[pageNumber];
+				disk.read(page);
+			}
+		} catch (IOException e) {
+			System.err.println("I/O Error: Issue with reading from BACKING_STORE.");
+			System.exit(1);
+		} finally {
+			try {
+				disk.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	public byte[] get(int page_num) {
+		return data[page_num];
+	}
+}

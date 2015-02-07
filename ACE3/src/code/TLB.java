@@ -1,7 +1,9 @@
 package code;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /* Version History:
  * 0.1: Initial Class Creation
@@ -16,28 +18,43 @@ import java.util.Map;
 public class TLB<K, V> {
 
 	PageTable pt;
+	
+	private Queue<Integer> pagesStored;
+	private Map<Integer, Integer> cacheMap;
 
-	private final Map<Integer, Integer> cacheMap;
-
-	double tlb_miss; 
+	double tlb_miss;
+	int capacity;
 	
 	public TLB (PageTable pt, final int cacheSize){
 		this.pt = pt;
 		tlb_miss = 0;
+		capacity = cacheSize;
 		
-		this.cacheMap = new LinkedHashMap<Integer, Integer>(cacheSize, 0.75f, true){
-
-			private static final long serialVersionUID = 8674981914305698482L;
-
-			@Override
-			protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest){
-				// Stipulate when to remove the eldest entry
-				return size() > cacheSize;
-			}
-		};
+		pagesStored = new ConcurrentLinkedQueue<Integer>();
+		cacheMap = new ConcurrentHashMap<Integer, Integer>(capacity);
+//		this.cacheMap = new LinkedHashMap<Integer, Integer>(cacheSize, 0.75f, true){
+//
+//			private static final long serialVersionUID = 8674981914305698482L;
+//
+//			@Override
+//			protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest){
+//				// Stipulate when to remove the eldest entry
+//				return size() > cacheSize;
+//			}
+//		};
 	}
 	
 	private synchronized void put(int pageNumber, int frameNumber){
+		if (cacheMap.containsKey(pageNumber)){
+			pagesStored.remove(pageNumber);
+		}
+		
+		while (pagesStored.size() >= capacity){
+			int expiredKey = pagesStored.poll();
+			cacheMap.remove(expiredKey);	
+		}
+		
+		pagesStored.add(pageNumber);
 		cacheMap.put(pageNumber, frameNumber);
 	}
 	
