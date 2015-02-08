@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PhysicalMemory {
-	private VirtualMemory bs;
+	private VirtualMemory vm;
 	
 	private Queue<Integer> pagesStored;
 	private Map<Integer, byte[]> ramMap;
@@ -45,7 +45,7 @@ public class PhysicalMemory {
 	int curFreeFrame;
 	final int capacity;
 
-	public PhysicalMemory(VirtualMemory bs, final int frames) {
+	public PhysicalMemory(VirtualMemory vm, final int frames) {
 		
 		capacity = frames;
 		pagesStored = new ConcurrentLinkedQueue<Integer>();
@@ -62,10 +62,26 @@ public class PhysicalMemory {
 //			}
 //		};
 		
-		this.bs = bs;
+		this.vm = vm;
 		curFreeFrame = 0;
 	}
 
+	/**
+	* Method: insertPage
+	* Arguments: (int frameNum)
+	*
+	* Checks the ramMap to see if we have the page, if so remove from the queue
+	* (In preperation to add it to the bottom of the queue.)
+	*
+	* If the size of the queue is greater than that of the set capacity,
+	* remove LRU items until the queue is less than the capacity size and decrement the
+	* currentFreeFrame counter.
+	*
+	* Add the currentFreeFrame to the queue, then add the currentFreeFrame and the byte array
+	* associated with the frameNumber from the VirtualMemory to the hashmap.
+	* 
+	* Return the currentFreeFrame.
+	**/
 	public synchronized int insertPage(int frameNum) {
 		
 		if (ramMap.containsKey(frameNum)){
@@ -79,14 +95,26 @@ public class PhysicalMemory {
 		}
 		
 		pagesStored.add(curFreeFrame);
-		ramMap.put(curFreeFrame, bs.get(frameNum));
+		ramMap.put(curFreeFrame, vm.get(frameNum));
 		
 		curFreeFrame++;
 		return curFreeFrame - 1;
 	}
 	
+	/**
+	* Method: getMemoryValue
+	* Arguments: (int frameNum, int offset)
+	* 
+	* Retrieve byte array stored at frameNum's key position in ramMap.
+	* If the byte array is null, throw NullPointerException.
+	* 
+	* Return the values contained in the array using the offset.
+	**/
 	public synchronized int getMemoryValue(int frameNum, int offset) {
 		byte[]value = ramMap.get(frameNum);
+		if (value == null){
+			throw new NullPointerException();
+		}
 		return value[offset];
 	}
 }
