@@ -1,3 +1,19 @@
+/**
+* Version History
+*
+* v0.1: Initial Implementation
+*
+* Thought Process:
+* Upon reviewing the provided classes, and documentation for RandomAccessFile
+* felt somewhat confident in how to approach storing the information provided in 
+* MakeBACKING_STORE.
+* Use a for to create entries into the array, multiplying the pagenumber by 256 to get the next
+* "block".
+* 
+* Implementation:
+* VirtualMemory class and get method.
+*/
+
 package code;
 
 import java.io.File;
@@ -40,6 +56,13 @@ public class VirtualMemory {
 
 	}
 
+	/**
+	 * Method: Get
+	 * Arguments: int page_num
+	 * 
+	 * Return the byte array stored at the specific position in the array denoted
+	 * by page number.
+	 **/
 	public byte[] get(int page_num) {
 		return data[page_num];
 	}
