@@ -12,7 +12,7 @@
 * the means to remove the eldest entry, the main requirement of a LRU cache.
 *
 * Implementation:
-* InsertPage, getMemoryValue and constructor created.
+* put, get and constructor created.
 *
 * v0.2: Concurrency
 * Thought Process:
