@@ -1,3 +1,19 @@
+/**
+* Version History
+*
+* v0.1: Initial Implementation
+*
+* Thought Process:
+* Upon review of the Java SDK, I chose to implement the PageTable using an int array.
+* Floated with the idea of a HashMap for performance, but felt it was a contrivance that wasn't
+* needed. 
+* To keep track of whether the page is valid, we use a boolean array to be set true when the
+* page has been accessed.
+*
+* Implementation:
+* getFrameNumber and constructor created.
+*/
+
 package code;
 
 public class PageTable {
@@ -14,7 +30,19 @@ public class PageTable {
 		
 		pageFault = 0;
 	}
-	
+
+	/**
+	 * Method: GetFrameNumber
+	 * Arguments: (int page_num)
+	 * 
+	 * Checks to see if page_num is valid by checking its respective position in
+	 * the valid array to see if it is true.
+	 * If not, then set it to be true, increase the pageFault count and set the value
+	 * of its respective position in the table array to the pageNumber from memory.
+	 * 
+	 * IF the page number is valid, return the value stored in its respective position
+	 * in the table array.
+	 **/	
 	public synchronized int getFrameNumber(int page_num){	
 		if (!valid[page_num]){
 			valid[page_num] = true;
@@ -24,16 +52,6 @@ public class PageTable {
 			return table[page_num];
 		}
 	}
-
-//	public int findIndex(int frameNum){
-//		for (int i = 0; i < table.length; i++){
-//			if (table[i] == frameNum){
-//				System.out.println("Index: " + i);
-//				return i;
-//			}
-//		}
-//		return -1;
-//	}
 	
 	public double getPageMisses(){
 		return (pageFault / 1000) * 100;
